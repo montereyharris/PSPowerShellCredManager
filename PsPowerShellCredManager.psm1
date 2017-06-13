@@ -28,44 +28,67 @@ Function Export-PsCredential {
     param(
         # Parameter help description
         [Parameter(Mandatory = $false)]
+        [Parameter(ParameterSetName = 'GenerateKeyFile')]
+        [Parameter(ParameterSetName = 'ProvidedKeyFile')]
         [ValidateSet(32,64)]
-        [int32]
+        [int]
         $Keylength = 32,
 
         [Parameter(Mandatory = $false)]
+        [Parameter(ParameterSetName = 'ProvidedKeyFile')]
         [string]
         $KeyFilepath,
 
-        # Parameter help description
+        [Parameter(Mandatory = $false)]
+        [Parameter(ParameterSetName = 'GenerateKeyFile')]
+        [Parameter(ParameterSetName = 'ProvidedKeyFile')]
+        [string]
+        $ExportCredFilePath,
+
         [Parameter(Mandatory = $true)]
-        [pscredential]
+        [Parameter(ParameterSetName = 'GenerateKeyFile')]
+        [string]
+        $ExportKeyFilePath,
+
+
+        # Parameter help description
+        [Parameter(Mandatory = $true, ValuefromPipeline = $true)]
+        [Parameter(ParameterSetName = 'GenerateKeyFile')]
+        [Parameter(ParameterSetName = 'ProvidedKeyFile')]
+        [pscredential[]]
         $Credential
     )
 
 
     Begin{
-        $plaintext = $credential.getnetworkcredential()
 
         if($KeyFilepath){$key = Get-Content -Path $KeyFilepath}
         else{$key = New-AESkey -Keylength 32 }
+        $credObject
 
     }
 
     Process{
-        $encryptedpassword = $plaintext.password| ConvertTo-SecureString -Key $Key
+        Foreach($cred in $credential){
+            $encryptedpassword = $cred.password | Convertfrom-SecureString  -Key $Key
+            $object = @{
 
+                username = $credential.UserName
+                Password = $encryptedpassword
+                key = $key
+
+
+            }
+
+            $CredObject += New-Object -TypeName PsObject -Property $object
+        }
     }
 
     End{
-            $object = @{
 
-                username = $plaintext.UserName
-                Password = $encryptedpassword
-                Key = $key
-            }
-
-            $CredObject = New-Object -TypeName PsObject -Property $object
             $CredObject
+            If($ExportCredFilePath){$credobject | select Username,Password|Export-CSV  -path "$ExportCredFilePath\CredObject.csv"  }
+            If($ExportKeyFilePath){$key|Set-Content -path $ExportKeyFilePath\Credkeyfile }
     }
 }
 
