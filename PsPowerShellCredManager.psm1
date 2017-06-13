@@ -51,6 +51,13 @@ Function Export-PsCredential {
         $ExportKeyFilePath,
 
 
+        [Parameter(Mandatory = $false)]
+        [Parameter(ParameterSetName = 'GenerateKeyFile')]
+        [Parameter(ParameterSetName = 'ProvidedKeyFile')]
+        [switch]
+        $ExportCredstoCSV,
+
+
         # Parameter help description
         [Parameter(Mandatory = $true, ValuefromPipeline = $true)]
         [Parameter(ParameterSetName = 'GenerateKeyFile')]
@@ -76,6 +83,8 @@ Function Export-PsCredential {
                 username = $credential.UserName
                 Password = $encryptedpassword
                 key = $key
+                Keylocation = if($KeyfilePath){$KeyFilepath}Else{ "$ExportKeyFilePath\credkeyfile"}
+                CredentialsLocation = "$ExportCredFilePath\Credfile"
 
 
             }
@@ -87,36 +96,43 @@ Function Export-PsCredential {
     End{
 
             $CredObject
-            If($ExportCredFilePath){$credobject | select Username,Password|Export-CSV  -path "$ExportCredFilePath\CredObject.csv"  }
+            If($ExportCredFilePath -and $ExportCredstoCSV){$credobject | select Username,Password|Export-CSV  -path "$ExportCredFilePath\CredObject.csv"  }
+            elseif($ExportCredFilePath){$credobject.password|%{$_|add-Content $ExportCredFilePath\Credfile} }
             If($ExportKeyFilePath){$key|Set-Content -path $ExportKeyFilePath\Credkeyfile }
     }
 }
 
+
 Function Import-PsCredential {
+
     [Cmdletbinding()]
     param(
         [Parameter(Mandatory = $true)]
+        [Parameter(ParameterSetName = 'CredFile')]
+        [Parameter( ParameterSetName = 'CredObject')]
         [string]
         $KeyFilepath,
 
-        [Parameter(Manadatory = $true, ParameterSetName = 'File')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'CredFile')]
         [string]
         $PasswordFilepath,
 
-        [Parameter(Manadatory = $true, ParameterSetName = 'File')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'CredFile')]
         [string]
         $Username,
 
-        [Parameter(Manadatory = $true, ParameterSetName = 'Object')]
+        [Parameter(Mandatory = $true, ParameterSetName = 'CredObject')]
         [System.Object[]]
         $UserObject
 
     )
 
     Begin{
+        If($PasswordFilepath -like "*.csv"){}
+
         $key = Get-Content $KeyfilePath
 
-        if($PScmdlet.parametersetname -eq 'File' ){
+        if($PScmdlet.parametersetname -eq 'CredFile' ){
         $pwd = Get-Content $PasswordFilepath
         $securePassword = $pwd | ConvertTo-SecureString -Key $Key
         $credObject = New-Object System.Management.Automation.PSCredential -ArgumentList $username,$securePassword
@@ -125,7 +141,7 @@ Function Import-PsCredential {
     }
 
     Process{
-        if($PScmdlet.parametersetname -eq 'Object' ){
+        if($PScmdlet.parametersetname -eq 'CredObject' ){
 
             $credObject = @()
 
