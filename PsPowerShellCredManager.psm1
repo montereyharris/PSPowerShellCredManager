@@ -128,7 +128,6 @@ Function Import-PsCredential {
     )
 
     Begin{
-        If($PasswordFilepath -like "*.csv"){}
 
         $key = Get-Content $KeyfilePath
 
