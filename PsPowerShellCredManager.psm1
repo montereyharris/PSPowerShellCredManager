@@ -77,7 +77,9 @@ Function Export-PsCredential {
 
     Process{
         Foreach($cred in $credential){
-            $encryptedpassword = $cred.password | Convertfrom-SecureString  -Key $Key
+
+
+            $encryptedpassword = $cred.Password | Convertfrom-SecureString  -Key $Key
             $object = @{
 
                 username = $credential.UserName
@@ -132,8 +134,8 @@ Function Import-PsCredential {
         $key = Get-Content $KeyfilePath
 
         if($PScmdlet.parametersetname -eq 'CredFile' ){
-        $pwd = Get-Content $PasswordFilepath
-        $securePassword = $pwd | ConvertTo-SecureString -Key $Key
+        $pswd = Get-Content $PasswordFilepath
+        $securePassword = $pswd | ConvertTo-SecureString -Key $Key -ErrorAction SilentlyContinue
         $credObject = New-Object System.Management.Automation.PSCredential -ArgumentList $username,$securePassword
 
         }
