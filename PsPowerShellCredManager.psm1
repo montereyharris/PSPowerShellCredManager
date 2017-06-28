@@ -152,9 +152,9 @@ Function Import-PsCredential {
 
                 If($propertytest){
 
-                    $pwd = $cred.password
+                    $pswd = $cred.password
                     $Username = $cred.username
-                    $securePassword = $pwd | ConvertTo-SecureString -Key $Key
+                    $securePassword = $pswd | ConvertTo-SecureString -Key $Key -ErrorAction SilentlyContinue
                     $credObject += New-Object System.Management.Automation.PSCredential -ArgumentList $username,$securePassword
 
 
