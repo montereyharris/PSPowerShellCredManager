@@ -45,7 +45,7 @@ Function Export-PsCredential {
         [string]
         $ExportCredFilePath,
 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [Parameter(ParameterSetName = 'GenerateKeyFile')]
         [string]
         $ExportKeyFilePath,
