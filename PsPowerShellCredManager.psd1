@@ -69,7 +69,7 @@ Copyright = '(c) 2017 Monterey Harris. All rights reserved.'
 FunctionsToExport = '*'
 
 # Cmdlets to export from this module
-CmdletsToExport = 'Import-PSCredential,Export-PsCredential'
+CmdletsToExport = 'Import-PSCredential','Export-PsCredential'
 
 # Variables to export from this module
 VariablesToExport = '*'
