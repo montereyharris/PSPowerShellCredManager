@@ -136,6 +136,7 @@ Function Import-PsCredential {
         if($PScmdlet.parametersetname -eq 'CredFile' ){
         $pswd = Get-Content $PasswordFilepath
         $securePassword = $pswd | ConvertTo-SecureString -Key $Key -ErrorAction SilentlyContinue
+        If($securePassword.count -gt 1){Write-Error -Message "Credential file contains mulitple passwords" -Exception "MultiplePasswords"}
         $credObject = New-Object System.Management.Automation.PSCredential -ArgumentList $username,$securePassword
 
         }
